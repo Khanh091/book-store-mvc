@@ -1,6 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from store.models import Customer, Rating, Book
 from django.contrib import messages
+from functools import wraps
+
+def customer_required(view_func):
+    """Decorator để yêu cầu customer phải đăng nhập"""
+    @wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        customer_id = request.session.get('customer_id')
+        if not customer_id:
+            return redirect('customer_login')
+        try:
+            request.customer = Customer.objects.get(id=customer_id)
+        except Customer.DoesNotExist:
+            request.session.pop('customer_id', None)
+            return redirect('customer_login')
+        return view_func(request, *args, **kwargs)
+    return _wrapped
 
 def customer_register(request):
     if request.method == 'POST':
@@ -31,19 +47,14 @@ def customer_logout(request):
     request.session.pop('customer_id', None)
     return redirect('home')
 
+@customer_required
 def customer_profile(request):
-    customer_id = request.session.get('customer_id')
-    if not customer_id:
-        return redirect('customer_login')
-    customer = get_object_or_404(Customer, id=customer_id)
-    return render(request, 'customer/profile.html', {'customer': customer})
+    return render(request, 'customer/profile.html', {'customer': request.customer})
 
+@customer_required
 def add_rating(request):
-    customer_id = request.session.get('customer_id')
-    if not customer_id:
-        return redirect('customer_login')
     if request.method == 'POST':
-        customer = get_object_or_404(Customer, id=customer_id)
+        customer = request.customer
         book_id = request.POST.get('book_id')
         score = int(request.POST.get('score'))
         book = get_object_or_404(Book, id=book_id)

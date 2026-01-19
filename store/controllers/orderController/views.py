@@ -1,38 +1,40 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from store.models import Cart, CartItem, Book, Order, Payment, Shipping, Customer, OrderItem
+from store.controllers.customerController.views import customer_required
 
+@customer_required
 def cart_view(request):
-    customer_id = request.session.get('customer_id', 1)  # Lấy từ session, mặc định 1
-    try:
-        customer = Customer.objects.get(id=customer_id)
-        cart, _ = Cart.objects.get_or_create(customer=customer, is_active=True)
-        items = CartItem.objects.filter(cart=cart)
-        total = sum(float(item.book.price) * item.quantity for item in items)
-        return render(request, 'cart/cart.html', {'items': items, 'total': total})
-    except Customer.DoesNotExist:
-        return render(request, 'cart/cart.html', {'items': [], 'total': 0, 'error': 'Please login first'})
+    customer = request.customer
+    cart, _ = Cart.objects.get_or_create(customer=customer, is_active=True)
+    items = CartItem.objects.filter(cart=cart)
+    total = sum(float(item.book.price) * item.quantity for item in items)
+    return render(request, 'cart/cart.html', {'items': items, 'total': total})
 
+@customer_required
 def add_to_cart(request, book_id):
-    customer_id = request.session.get('customer_id', 1)
-    try:
-        customer = Customer.objects.get(id=customer_id)
-        cart, _ = Cart.objects.get_or_create(customer=customer, is_active=True)
-        book = get_object_or_404(Book, id=book_id)
-        # Kiểm tra xem sách đã có trong giỏ chưa
-        cart_item, created = CartItem.objects.get_or_create(cart=cart, book=book, defaults={'quantity': 1})
-        if not created:
-            cart_item.quantity += 1
-            cart_item.save()
-        return redirect('cart_view')
-    except Customer.DoesNotExist:
-        return redirect('customer_login')
+    customer = request.customer
+    cart, _ = Cart.objects.get_or_create(customer=customer, is_active=True)
+    book = get_object_or_404(Book, id=book_id)
+    # Kiểm tra stock
+    if book.stock_quantity <= 0:
+        from django.contrib import messages
+        messages.error(request, 'Book is out of stock')
+        return redirect('book_detail', pk=book_id)
+    # Kiểm tra xem sách đã có trong giỏ chưa
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, book=book, defaults={'quantity': 1})
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+    return redirect('cart_view')
 
+@customer_required
 def checkout(request):
-    customer_id = request.session.get('customer_id', 1)
+    customer = request.customer
     try:
-        customer = Customer.objects.get(id=customer_id)
         cart = Cart.objects.get(customer=customer, is_active=True)
         items = CartItem.objects.filter(cart=cart)
+        if not items.exists():
+            return redirect('cart_view')
         # Calculate item totals for display
         items_with_total = []
         subtotal = 0
@@ -57,7 +59,7 @@ def checkout(request):
             'payment': payment,
             'shipping': shipping
         })
-    except (Customer.DoesNotExist, Cart.DoesNotExist):
+    except Cart.DoesNotExist:
         return redirect('cart_view')
 
 def select_payment(request):
