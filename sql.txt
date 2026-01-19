@@ -1,3 +1,4 @@
+use bookstore_db;
 START TRANSACTION;
 
 -- 1) Staff accounts
