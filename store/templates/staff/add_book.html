@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>Add Book</title></head>
+<body>
+<h1>Add Book</h1>
+<form method="post">
+{% csrf_token %}
+Title: <input name="title"><br>
+Author: <input name="author"><br>
+Price: <input name="price"><br>
+Stock: <input name="stock"><br>
+<button type="submit">Add</button>
+</form>
+</body>
+</html>

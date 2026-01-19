@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart - Bookstore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Your Cart</h1>
+        {% if error %}
+        <div class="alert alert-warning">{{ error }}</div>
+        {% endif %}
+        {% if items %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.book.title }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.book.price }}</td>
+                    <td>${{ item.book.price|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3">Total:</th>
+                    <th>${{ total|floatformat:2 }}</th>
+                </tr>
+            </tfoot>
+        </table>
+        <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
+        {% else %}
+        <p>Your cart is empty.</p>
+        {% endif %}
+        <a href="{% url 'book_list' %}" class="btn btn-secondary">Continue Shopping</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+    </div>
+</body>
+</html>
