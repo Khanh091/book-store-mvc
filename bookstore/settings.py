@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-6r3-^j)b#r0df+w7fyfxhvc)n^%xm7h-l$v#+**$t)s1vfil4+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # Cho phép truy cập từ mọi host (Docker)
 
 
 # Application definition
@@ -73,15 +73,17 @@ WSGI_APPLICATION = 'bookstore.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# bookstore/settings.py
+# Đọc từ environment variables (Docker) hoặc dùng giá trị mặc định (local dev)
+import os
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bookstore_db',  # Tên DB bạn tạo
-        'USER': 'root',  # Username MySQL (mặc định root)
-        'PASSWORD': '123456',  # Password MySQL (mặc định rỗng nếu dùng XAMPP)
-        'HOST': 'localhost',  # Hoặc '127.0.0.1'
-        'PORT': '3306',
+        'NAME': os.environ.get('DATABASE_NAME', 'bookstore_db'),
+        'USER': os.environ.get('DATABASE_USER', 'root'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', '123456'),
+        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
+        'PORT': os.environ.get('DATABASE_PORT', '3306'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
