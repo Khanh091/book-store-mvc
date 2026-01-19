@@ -14,8 +14,9 @@
                 <h5 class="card-title">{{ customer.name }}</h5>
                 <p class="card-text"><strong>Email:</strong> {{ customer.email }}</p>
                 <a href="{% url 'book_list' %}" class="btn btn-primary">Browse Books</a>
-                <a href="{% url 'recommend_books' customer.id %}" class="btn btn-success">Recommended Books</a>
+                <a href="{% url 'recommend_books' %}" class="btn btn-success">Recommended Books</a>
                 <a href="{% url 'cart_view' %}" class="btn btn-info">View Cart</a>
+                <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
             </div>
         </div>
     </div>

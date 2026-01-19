@@ -13,8 +13,11 @@ def book_search(request):
     query = request.GET.get('q')
     books = Book.objects.filter(title__icontains=query) if query else []
     return render(request, 'book/search.html', {'books': books})
-def recommend_books(request, customer_id):
-    customer = get_object_or_404(Customer, id=customer_id)
+from store.controllers.customerController.views import customer_required
+
+@customer_required
+def recommend_books(request):
+    customer = request.customer
     # Gợi ý dựa trên lịch sử order và rating
     from store.models import OrderItem
     bought_books = OrderItem.objects.filter(order__customer=customer).values_list('book_id', flat=True).distinct()

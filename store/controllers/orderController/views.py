@@ -62,14 +62,16 @@ def checkout(request):
     except Cart.DoesNotExist:
         return redirect('cart_view')
 
+@customer_required
 def select_payment(request):
     if request.method == 'POST':
         payment_id = request.POST.get('payment_id')
         request.session['payment_id'] = payment_id
         return redirect('checkout')
-    payments = Payment.objects.all()
+    payments = Payment.objects.filter(status='active')
     return render(request, 'order/select_payment.html', {'payments': payments})
 
+@customer_required
 def select_shipping(request):
     if request.method == 'POST':
         shipping_id = request.POST.get('shipping_id')
@@ -80,15 +82,22 @@ def select_shipping(request):
     shippings = Shipping.objects.all()
     return render(request, 'order/select_shipping.html', {'shippings': shippings})
 
+@customer_required
 def place_order(request):
-    customer_id = request.session.get('customer_id', 1)
+    customer = request.customer
     try:
-        customer = Customer.objects.get(id=customer_id)
         cart = Cart.objects.get(customer=customer, is_active=True)
         items = CartItem.objects.filter(cart=cart)
         
         if not items.exists():
             return redirect('cart_view')
+        
+        # Kiểm tra stock trước khi đặt hàng
+        for item in items:
+            if item.book.stock_quantity < item.quantity:
+                from django.contrib import messages
+                messages.error(request, f'Not enough stock for {item.book.title}')
+                return redirect('cart_view')
         
         # Tính total_price (dùng float cho cùng kiểu với shipping_fee trong session)
         subtotal = sum(float(item.book.price) * item.quantity for item in items)
@@ -131,10 +140,12 @@ def place_order(request):
         request.session.pop('shipping_fee', None)
         
         return redirect('order_success', order_id=order.id)
-    except (Customer.DoesNotExist, Cart.DoesNotExist):
+    except Cart.DoesNotExist:
         return redirect('cart_view')
 
+@customer_required
 def order_success(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
+    customer = request.customer
+    order = get_object_or_404(Order, id=order_id, customer=customer)
     items = OrderItem.objects.filter(order=order)
     return render(request, 'order/success.html', {'order': order, 'items': items})

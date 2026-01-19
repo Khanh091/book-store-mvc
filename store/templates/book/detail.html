@@ -20,6 +20,7 @@
                 <button class="btn btn-secondary" disabled>Out of Stock</button>
                 {% endif %}
                 <a href="{% url 'book_list' %}" class="btn btn-secondary">Back to List</a>
+                <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
                 <hr>
                 <h5>Rate this book</h5>
                 <form method="POST" action="{% url 'add_rating' %}">
