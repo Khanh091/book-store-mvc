@@ -28,7 +28,7 @@
                     <td>{{ item.book.title }}</td>
                     <td>{{ item.quantity }}</td>
                     <td>${{ item.book.price }}</td>
-                    <td>${{ item.book.price|floatformat:2 }}</td>
+                    <td>${% widthratio item.book.price 1 item.quantity %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
