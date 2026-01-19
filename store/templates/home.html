@@ -45,8 +45,12 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Staff</h5>
-                        <a href="{% url 'staff_add_book' %}" class="btn btn-primary">Add Book</a>
+                        <h5 class="card-title">Staff Area</h5>
+                        <a href="{% url 'staff_login' %}" class="btn btn-primary">Staff Login</a>
+                        {% if request.session.staff_id %}
+                        <a href="{% url 'staff_dashboard' %}" class="btn btn-success">Dashboard</a>
+                        <a href="{% url 'staff_logout' %}" class="btn btn-danger">Logout</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
