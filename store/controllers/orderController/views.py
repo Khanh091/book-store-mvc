@@ -88,8 +88,8 @@ def place_order(request):
         if not items.exists():
             return redirect('cart_view')
         
-        # Tính total_price
-        subtotal = sum(item.book.price * item.quantity for item in items)
+        # Tính total_price (dùng float cho cùng kiểu với shipping_fee trong session)
+        subtotal = sum(float(item.book.price) * item.quantity for item in items)
         shipping_fee = request.session.get('shipping_fee', 0)
         total_price = subtotal + shipping_fee
         
