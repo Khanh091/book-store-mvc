@@ -8,33 +8,91 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Search Results</h1>
-        <form method="GET" action="{% url 'book_search' %}" class="mb-4">
-            <div class="input-group">
-                <input type="text" name="q" class="form-control" placeholder="Search books..." value="{{ request.GET.q }}">
-                <button type="submit" class="btn btn-primary">Search</button>
+        <h1 class="mb-4">Search Books</h1>
+        
+        <!-- Search Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <input type="text" id="searchInput" class="form-control form-control-lg" 
+                               placeholder="Nhap tu khoa tim kiem..." value="{{ query }}">
+                    </div>
+                    <div class="col-md-4 d-flex gap-2">
+                        <button onclick="searchKeyword()" class="btn btn-primary flex-fill">
+                            Keyword Search
+                        </button>
+                        <button onclick="searchVector()" class="btn btn-success flex-fill">
+                            Vector Search
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <!-- <small class="text-muted">
+                        <strong>Keyword:</strong> Tim khop tu khoa trong ten sach va tac gia | 
+                        <strong>Vector:</strong> Tim theo ngu nghia (AI)
+                    </small> -->
+                </div>
             </div>
-        </form>
+        </div>
+        
+        <!-- Search Results -->
+        {% if search_type %}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>
+                Ket qua: "{{ query }}" 
+                {% if search_type == 'keyword' %}
+                <span class="badge bg-primary">Keyword</span>
+                {% else %}
+                <span class="badge bg-success">Vector</span>
+                {% endif %}
+            </h4>
+            <span class="text-muted">{{ books|length }} ket qua</span>
+        </div>
+        
         {% if books %}
         <div class="row">
             {% for book in books %}
             <div class="col-md-4 mb-4">
-                <div class="card">
+                <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title">{{ book.title }}</h5>
-                        <p class="card-text">Author: {{ book.author }}</p>
-                        <p class="card-text">Price: ${{ book.price }}</p>
-                        <a href="{% url 'book_detail' book.id %}" class="btn btn-primary">View Details</a>
+                        <p class="card-text">Tac gia: {{ book.author }}</p>
+                        <p class="card-text">Gia: ${{ book.price }}</p>
+                        {% if search_type == 'vector' and book.similarity_score %}
+                        <span class="badge bg-info">{{ book.similarity_score }}% match</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{% url 'book_detail' book.id %}" class="btn btn-outline-primary btn-sm">Chi tiet</a>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <p>No books found.</p>
+        <div class="alert alert-info">Khong tim thay sach nao.</div>
         {% endif %}
-        <a href="{% url 'book_list' %}" class="btn btn-secondary">Back to Book List</a>
-        <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+        {% endif %}
+        
+        <div class="mt-4">
+            <a href="{% url 'book_list' %}" class="btn btn-secondary">Danh sach sach</a>
+            <a href="{% url 'home' %}" class="btn btn-secondary">Trang chu</a>
+        </div>
     </div>
+    
+    <script>
+        function searchKeyword() {
+            const q = document.getElementById('searchInput').value;
+            window.location.href = "{% url 'book_search_keyword' %}?q=" + encodeURIComponent(q);
+        }
+        function searchVector() {
+            const q = document.getElementById('searchInput').value;
+            window.location.href = "{% url 'book_search_vector' %}?q=" + encodeURIComponent(q);
+        }
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchKeyword();
+        });
+    </script>
 </body>
 </html>

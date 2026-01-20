@@ -1,6 +1,17 @@
 from django.shortcuts import render, get_object_or_404
 from store.models import Book, Customer, Order, Rating
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer
+
+# Load model một lần để tối ưu performance
+_model = None
+def get_embedding_model():
+    global _model
+    if _model is None:
+        _model = SentenceTransformer('all-MiniLM-L6-v2')
+    return _model
 
 def book_list(request):
     books = Book.objects.all()
@@ -11,20 +22,50 @@ def book_detail(request, pk):
     return render(request, 'book/detail.html', {'book': book})
 
 def book_search(request):
-    query = request.GET.get('q')
-    books = Book.objects.filter(title__icontains=query) if query else []
-    return render(request, 'book/search.html', {'books': books})
+    """Trang search chính"""
+    return render(request, 'book/search.html', {'books': [], 'search_type': None})
+
+def book_search_keyword(request):
+    """Search keyword: tìm trong title và author"""
+    query = request.GET.get('q', '').strip()
+    books = []
+    if query:
+        books = Book.objects.filter(Q(title__icontains=query) | Q(author__icontains=query))
+    return render(request, 'book/search.html', {'books': books, 'search_type': 'keyword', 'query': query})
+
+def book_search_vector(request):
+    """Search vector: tìm theo semantic similarity"""
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return render(request, 'book/search.html', {'books': [], 'search_type': 'vector', 'query': query})
+    
+    # Encode query
+    model = get_embedding_model()
+    query_vector = model.encode(query).reshape(1, -1)
+    
+    # Lấy sách có embedding
+    books_list = list(Book.objects.filter(embedding__isnull=False).exclude(embedding=''))
+    book_vectors, valid_books = [], []
+    for book in books_list:
+        emb = book.get_embedding()
+        if emb:
+            book_vectors.append(emb)
+            valid_books.append(book)
+    
+    if not book_vectors:
+        return render(request, 'book/search.html', {'books': [], 'search_type': 'vector', 'query': query})
+    
+    # Tính similarity và sắp xếp
+    similarities = cosine_similarity(query_vector, np.array(book_vectors))[0]
+    results = []
+    for idx in np.argsort(similarities)[::-1][:10]:
+        if similarities[idx] > 0.1:
+            valid_books[idx].similarity_score = round(similarities[idx] * 100, 2)
+            results.append(valid_books[idx])
+    
+    return render(request, 'book/search.html', {'books': results, 'search_type': 'vector', 'query': query})
 from store.controllers.customerController.views import customer_required
 
-@customer_required
-def recommend_books(request):
-    customer = request.customer
-    # Gợi ý dựa trên lịch sử order và rating
-    from store.models import OrderItem
-    bought_books = OrderItem.objects.filter(order__customer=customer).values_list('book_id', flat=True).distinct()
-    similar_customers = Rating.objects.filter(book_id__in=bought_books, score__gte=4).values_list('customer', flat=True).distinct()
-    recommended = Book.objects.filter(rating__customer__in=similar_customers, rating__score__gte=4).exclude(id__in=bought_books).distinct()[:10]
-    return render(request, 'book/recommend.html', {'books': recommended, 'customer': customer})
 def home(request):
     return render(request, 'home.html', {'message': 'Welcome to Bookstore Management System'})
 def recommend_books(request, customer_id):
