@@ -2,41 +2,48 @@ version: '3.8'
 
 services:
   db:
-    image: mysql:8.0  # Image MySQL
+    image: mysql:8.0
+    container_name: mysql_bookstore
     restart: always
     environment:
-      MYSQL_DATABASE: bookstore_db  # Tên DB
-      MYSQL_ROOT_PASSWORD: rootpassword  # Password root (thay bằng password mạnh)
-      MYSQL_USER: django_user  # User cho Django
-      MYSQL_PASSWORD: django_pass  # Password cho user
-    ports:
-      - "3307:3306"  # Map port 3307 host -> 3306 container (tránh xung đột với MySQL local)
+      MYSQL_DATABASE: bookstore_db
+      MYSQL_USER: django_user
+      MYSQL_PASSWORD: django_pass
+      MYSQL_ROOT_PASSWORD: root123456
     volumes:
-      - db_data:/var/lib/mysql  # Volume lưu data DB
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "django_user", "-pdjango_pass"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   web:
-    build: .  # Build từ Dockerfile ở thư mục hiện tại
+    build: .
+    container_name: django_bookstore
     command: >
-      sh -c "python manage.py migrate --noinput &&
-             python manage.py runserver 0.0.0.0:8000"
+      sh -c "
+      python manage.py migrate --noinput &&
+      python manage.py collectstatic --noinput &&
+      python manage.py runserver 0.0.0.0:8000
+      "
     volumes:
-      - .:/app  # Mount code local vào container (dễ dev)
+      - .:/app
+      - static_data:/app/staticfiles
     ports:
-      - "8000:8000"  # Map port 8000
+      - "8000:8000"
     environment:
-      - DATABASE_HOST=db  # Tên service DB trong Docker network
-      - DATABASE_NAME=bookstore_db
-      - DATABASE_USER=django_user
-      - DATABASE_PASSWORD=django_pass
-      - DATABASE_PORT=3306
+      DATABASE_NAME: bookstore_db
+      DATABASE_USER: django_user
+      DATABASE_PASSWORD: django_pass
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
     depends_on:
       db:
-        condition: service_healthy  # Đợi DB healthy trước khi start web
+        condition: service_healthy
 
 volumes:
-  db_data:  # Volume cho DB
+  db_data:
+  static_data:
