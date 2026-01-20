@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from store.models import Customer, Rating, Book
 from django.contrib import messages
 from functools import wraps
+from django.db.models import Avg, Count
 
 def customer_required(view_func):
     """Decorator để yêu cầu customer phải đăng nhập"""
@@ -49,7 +50,45 @@ def customer_logout(request):
 
 @customer_required
 def customer_profile(request):
-    return render(request, 'customer/profile.html', {'customer': request.customer})
+    customer = request.customer
+
+    # Gợi ý sách cho trang chính sau khi customer login
+    from store.models import OrderItem
+
+    bought_book_ids = list(
+        OrderItem.objects.filter(order__customer=customer)
+        .values_list('book_id', flat=True)
+        .distinct()
+    )
+
+    if not bought_book_ids:
+        recommended_books = (
+            Book.objects.annotate(
+                avg_rating=Avg('rating__score', default=0),
+                order_count=Count('orderitem', default=0),
+            )
+            .order_by('-avg_rating', '-order_count')[:5]
+        )
+    else:
+        similar_customer_ids = list(
+            Rating.objects.filter(book_id__in=bought_book_ids, score__gte=4)
+            .values_list('customer_id', flat=True)
+            .distinct()
+        )
+        recommended_books = (
+            Book.objects.filter(
+                rating__customer_id__in=similar_customer_ids,
+                rating__score__gte=4,
+            )
+            .exclude(id__in=bought_book_ids)
+            .distinct()[:5]
+        )
+
+    return render(
+        request,
+        'customer/profile.html',
+        {'customer': customer, 'recommended_books': recommended_books},
+    )
 
 @customer_required
 def add_rating(request):

@@ -19,6 +19,32 @@
                 <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
             </div>
         </div>
+
+        {% if recommended_books %}
+        <div class="mt-4">
+            <h3>Recommended for you</h3>
+            <div class="row">
+                {% for book in recommended_books %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ book.title }}</h5>
+                            <p class="card-text">Author: {{ book.author }}</p>
+                            <p class="card-text">Price: ${{ book.price }}</p>
+                            <p class="card-text">Stock: {{ book.stock_quantity }}</p>
+                            <a href="{% url 'book_detail' book.id %}" class="btn btn-primary btn-sm">View Details</a>
+                            <a href="{% url 'add_to_cart' book.id %}" class="btn btn-success btn-sm">Add to Cart</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="mt-4">
+            <h5>No recommendations available yet.</h5>
+        </div>
+        {% endif %}
     </div>
 </body>
 </html>
