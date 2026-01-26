@@ -63,8 +63,14 @@
                         <span class="badge bg-info">{{ book.similarity_score }}% match</span>
                         {% endif %}
                     </div>
-                    <div class="card-footer bg-transparent">
+                    <div class="card-footer bg-transparent d-flex gap-2">
                         <a href="{% url 'book_detail' book.id %}" class="btn btn-outline-primary btn-sm">Chi tiet</a>
+                        {% if book.stock_quantity > 0 %}
+                        <a href="{% url 'add_to_cart' book.id %}" class="btn btn-success btn-sm">Add to Cart</a>
+                        <a href="{% url 'buy_now' book.id %}" class="btn btn-warning btn-sm">Mua ngay</a>
+                        {% else %}
+                        <span class="text-muted small align-self-center">Het hang</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -27,6 +27,7 @@
                         <a href="{% url 'book_detail' book.id %}" class="btn btn-primary">View Details</a>
                         {% if book.stock_quantity > 0 %}
                         <a href="{% url 'add_to_cart' book.id %}" class="btn btn-success">Add to Cart</a>
+                        <a href="{% url 'buy_now' book.id %}" class="btn btn-warning">Buy Now</a>
                         {% endif %}
                     </div>
                 </div>

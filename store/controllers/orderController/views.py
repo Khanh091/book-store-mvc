@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from store.models import Cart, CartItem, Book, Order, Payment, Shipping, Customer, OrderItem
 from store.controllers.customerController.views import customer_required
+from django.contrib import messages
 
 @customer_required
 def cart_view(request):
@@ -17,7 +18,6 @@ def add_to_cart(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     # Kiểm tra stock
     if book.stock_quantity <= 0:
-        from django.contrib import messages
         messages.error(request, 'Book is out of stock')
         return redirect('book_detail', pk=book_id)
     # Kiểm tra xem sách đã có trong giỏ chưa
@@ -26,6 +26,21 @@ def add_to_cart(request, book_id):
         cart_item.quantity += 1
         cart_item.save()
     return redirect('cart_view')
+
+@customer_required
+def buy_now(request, book_id):
+    """Add a single book to the cart then go straight to checkout."""
+    customer = request.customer
+    cart, _ = Cart.objects.get_or_create(customer=customer, is_active=True)
+    book = get_object_or_404(Book, id=book_id)
+    if book.stock_quantity <= 0:
+        messages.error(request, 'Book is out of stock')
+        return redirect('book_detail', pk=book_id)
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, book=book, defaults={'quantity': 1})
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+    return redirect('checkout')
 
 @customer_required
 def checkout(request):
@@ -95,7 +110,6 @@ def place_order(request):
         # Kiểm tra stock trước khi đặt hàng
         for item in items:
             if item.book.stock_quantity < item.quantity:
-                from django.contrib import messages
                 messages.error(request, f'Not enough stock for {item.book.title}')
                 return redirect('cart_view')
         
