@@ -1,5 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from store.models import Book, Customer, Order, Rating
+from store.controllers.customerController.views import customer_required
 from django.db.models import Avg, Count, Q
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -67,9 +68,11 @@ def book_search_vector(request):
 from store.controllers.customerController.views import customer_required
 
 def home(request):
-    return render(request, 'home.html', {'message': 'Welcome to Bookstore Management System'})
-def recommend_books(request, customer_id):
-    customer = get_object_or_404(Customer, id=customer_id)
+    return render(request, 'home.html', {'message': 'Chào mừng đến với Bookstore'})
+
+@customer_required
+def recommend_books(request):
+    customer = request.customer
     
     bought_books = Book.objects.filter(orderitem__order__customer=customer).distinct()
     
