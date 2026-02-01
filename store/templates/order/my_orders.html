@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Đơn mua của tôi - Bookstore{% endblock %}
+{% block content %}
+<h1 class="page-title">Đơn mua của tôi</h1>
+{% if orders %}
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái giao hàng</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                <td>${{ order.total_price }}</td>
+                <td>
+                    <span class="badge
+                        {% if order.delivery_status == 'delivered' %}bg-success
+                        {% elif order.delivery_status == 'in_transit' or order.delivery_status == 'picked_up' %}bg-primary
+                        {% else %}bg-warning text-dark{% endif %}">
+                        {{ order.get_delivery_status_display }}
+                    </span>
+                    <small class="text-muted d-block">{{ order.delivery_status_updated_at|date:"d/m/Y H:i" }}</small>
+                </td>
+                <td>
+                    <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>Bạn chưa có đơn hàng nào.</p>
+    <a href="{% url 'book_list' %}" class="btn btn-primary">Mua sách</a>
+</div>
+{% endif %}
+<div class="btn-action-group mt-3">
+    <a href="{% url 'customer_profile' %}" class="btn btn-outline-secondary">Về hồ sơ</a>
+    <a href="{% url 'book_list' %}" class="btn btn-outline-secondary">Tiếp tục mua sắm</a>
+</div>
+{% endblock %}

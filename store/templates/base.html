@@ -37,6 +37,7 @@
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navCustomer">
                                 {% if request.session.customer_id %}
                                 <li><a class="dropdown-item" href="{% url 'customer_profile' %}">Hồ sơ</a></li>
+                                <li><a class="dropdown-item" href="{% url 'my_orders' %}">Đơn mua của tôi</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="{% url 'customer_logout' %}">Đăng xuất</a></li>
                                 {% else %}

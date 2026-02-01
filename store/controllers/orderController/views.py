@@ -163,3 +163,20 @@ def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id, customer=customer)
     items = OrderItem.objects.filter(order=order)
     return render(request, 'order/success.html', {'order': order, 'items': items})
+
+
+@customer_required
+def my_orders(request):
+    """Danh sách đơn hàng của khách với trạng thái giao hàng."""
+    customer = request.customer
+    orders = Order.objects.filter(customer=customer).order_by('-created_at')
+    return render(request, 'order/my_orders.html', {'orders': orders})
+
+
+@customer_required
+def order_detail(request, order_id):
+    """Chi tiết đơn hàng và trạng thái giao hàng."""
+    customer = request.customer
+    order = get_object_or_404(Order, id=order_id, customer=customer)
+    items = OrderItem.objects.filter(order=order)
+    return render(request, 'order/order_detail.html', {'order': order, 'items': items})

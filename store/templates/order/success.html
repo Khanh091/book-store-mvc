@@ -28,7 +28,9 @@
     </table>
 </div>
 <div class="btn-action-group">
-    <a href="{% url 'book_list' %}" class="btn btn-primary">Tiếp tục mua sắm</a>
+    <a href="{% url 'order_detail' order.id %}" class="btn btn-primary">Xem trạng thái giao hàng</a>
+    <a href="{% url 'my_orders' %}" class="btn btn-outline-primary">Đơn mua của tôi</a>
+    <a href="{% url 'book_list' %}" class="btn btn-outline-secondary">Tiếp tục mua sắm</a>
     <a href="{% url 'home' %}" class="btn btn-outline-secondary">Về trang chủ</a>
 </div>
 {% endblock %}

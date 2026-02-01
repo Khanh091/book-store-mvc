@@ -8,7 +8,8 @@
         <p class="card-text text-muted mb-3"><strong>Email:</strong> {{ customer.email }}</p>
         <div class="btn-action-group">
             <a href="{% url 'book_list' %}" class="btn btn-primary">Mua sách</a>
-            <a href="{% url 'recommend_books' %}" class="btn btn-success">Sách gợi ý</a>
+            <a href="{% url 'my_orders' %}" class="btn btn-success">Đơn mua của tôi</a>
+            <a href="{% url 'recommend_books' %}" class="btn btn-outline-primary">Sách gợi ý</a>
             <a href="{% url 'cart_view' %}" class="btn btn-outline-primary">Giỏ hàng</a>
         </div>
     </div>

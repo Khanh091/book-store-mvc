@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Đơn hàng #{{ order.id }} - Bookstore{% endblock %}
+{% block content %}
+<h1 class="page-title">Chi tiết đơn hàng #{{ order.id }}</h1>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Trạng thái giao hàng</h5>
+        <p class="mb-2">
+            <span class="badge fs-6
+                {% if order.delivery_status == 'delivered' %}bg-success
+                {% elif order.delivery_status == 'in_transit' or order.delivery_status == 'picked_up' %}bg-primary
+                {% else %}bg-warning text-dark{% endif %}">
+                {{ order.get_delivery_status_display }}
+            </span>
+        </p>
+        <p class="text-muted small mb-0">Cập nhật lúc: {{ order.delivery_status_updated_at|date:"d/m/Y H:i" }}</p>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3">Thông tin đơn hàng</h5>
+        <p class="mb-1"><strong>Ngày đặt:</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+        <p class="mb-1"><strong>Tổng tiền:</strong> ${{ order.total_price }}</p>
+        {% if order.payment %}<p class="mb-1"><strong>Thanh toán:</strong> {{ order.payment.method_name }}</p>{% endif %}
+        {% if order.shipping %}<p class="mb-0"><strong>Vận chuyển:</strong> {{ order.shipping.method_name }}</p>{% endif %}
+    </div>
+</div>
+
+<h5 class="mb-3">Sản phẩm</h5>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Sách</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
+                <th>Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.book.title }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.price }}</td>
+                <td>${% widthratio item.price 1 item.quantity %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="btn-action-group">
+    <a href="{% url 'my_orders' %}" class="btn btn-primary">Danh sách đơn hàng</a>
+    <a href="{% url 'customer_profile' %}" class="btn btn-outline-secondary">Về hồ sơ</a>
+    <a href="{% url 'book_list' %}" class="btn btn-outline-secondary">Tiếp tục mua sắm</a>
+</div>
+{% endblock %}
