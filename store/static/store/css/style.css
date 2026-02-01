@@ -1,0 +1,170 @@
+/* Bookstore - Custom styles */
+:root {
+  --bs-bookstore-primary: #2c5f4f;
+  --bs-bookstore-light: #3d7a68;
+  --bs-bookstore-bg: #f8f6f3;
+  --bs-bookstore-card: #fff;
+  --header-height: 56px;
+}
+
+body {
+  background-color: var(--bs-bookstore-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+/* Header / Navbar */
+.navbar-bookstore {
+  background: linear-gradient(135deg, var(--bs-bookstore-primary) 0%, #1e4238 100%) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.navbar-bookstore .navbar-brand {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #fff !important;
+}
+
+.navbar-bookstore .nav-link {
+  color: rgba(255,255,255,0.9) !important;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 6px;
+}
+
+.navbar-bookstore .nav-link:hover,
+.navbar-bookstore .nav-link:focus {
+  color: #fff !important;
+  background: rgba(255,255,255,0.15);
+}
+
+.navbar-bookstore .dropdown-menu {
+  border: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  border-radius: 8px;
+}
+
+.navbar-bookstore .btn-outline-light:hover {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+/* Cart badge */
+.cart-count-badge {
+  font-size: 0.7rem;
+  vertical-align: top;
+}
+
+/* Cards */
+.card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.card-body .btn {
+  margin-right: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+/* Buttons - thứ tự rõ ràng */
+.btn-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-primary {
+  background-color: var(--bs-bookstore-primary);
+  border-color: var(--bs-bookstore-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--bs-bookstore-light);
+  border-color: var(--bs-bookstore-light);
+}
+
+/* Page title */
+.page-title {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1.25rem;
+}
+
+/* Tables */
+.table {
+  background: var(--bs-bookstore-card);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.table thead th {
+  background-color: var(--bs-bookstore-primary);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  padding: 0.85rem 1rem;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(44, 95, 79, 0.04);
+}
+
+/* Forms */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--bs-bookstore-primary);
+  box-shadow: 0 0 0 0.2rem rgba(44, 95, 79, 0.25);
+}
+
+/* Footer */
+.site-footer {
+  background: #2d3748;
+  color: rgba(255,255,255,0.8);
+  padding: 1rem 0;
+  margin-top: auto;
+  font-size: 0.9rem;
+}
+
+.site-footer a {
+  color: rgba(255,255,255,0.9);
+}
+
+/* Alerts */
+.alert {
+  border: none;
+  border-radius: 8px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #718096;
+}
+
+/* Book grid */
+.book-card .card-title {
+  font-weight: 600;
+  color: #2d3748;
+  min-height: 2.5em;
+}
+
+.book-card .card-footer {
+  background: #fff;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
