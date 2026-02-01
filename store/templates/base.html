@@ -22,7 +22,6 @@
                             <a class="nav-link dropdown-toggle" href="#" id="navBooks" role="button" data-bs-toggle="dropdown" aria-expanded="false">Sách</a>
                             <ul class="dropdown-menu" aria-labelledby="navBooks">
                                 <li><a class="dropdown-item" href="{% url 'book_list' %}">Danh sách sách</a></li>
-                                <li><a class="dropdown-item" href="{% url 'book_search' %}">Tìm kiếm</a></li>
                                 {% if request.session.customer_id %}
                                 <li><a class="dropdown-item" href="{% url 'recommend_books' %}">Gợi ý cho tôi</a></li>
                                 {% endif %}
@@ -32,12 +31,10 @@
                             <a class="nav-link" href="{% url 'cart_view' %}">Giỏ hàng {% if cart_count %}<span class="badge bg-light text-dark cart-count-badge">{{ cart_count }}</span>{% endif %}</a>
                         </li>
                     </ul>
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto align-items-center flex-wrap">
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navAccount" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                {% if request.session.customer_id %}Tài khoản{% else %}Đăng nhập{% endif %}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navAccount">
+                            <a class="nav-link dropdown-toggle" href="#" id="navCustomer" role="button" data-bs-toggle="dropdown" aria-expanded="false">Khách hàng</a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navCustomer">
                                 {% if request.session.customer_id %}
                                 <li><a class="dropdown-item" href="{% url 'customer_profile' %}">Hồ sơ</a></li>
                                 <li><hr class="dropdown-divider"></li>

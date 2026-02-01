@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from urllib.parse import quote
 from store.models import Book, Customer, Order, Rating
 from store.controllers.customerController.views import customer_required
 from django.db.models import Avg, Count, Q
@@ -15,36 +16,30 @@ def get_embedding_model():
     return _model
 
 def book_list(request):
-    books = Book.objects.all()
-    return render(request, 'book/list.html', {'books': books})
-
-def book_detail(request, pk):
-    book = get_object_or_404(Book, pk=pk)
-    return render(request, 'book/detail.html', {'book': book})
-
-def book_search(request):
-    """Trang search chính"""
-    return render(request, 'book/search.html', {'books': [], 'search_type': None})
-
-def book_search_keyword(request):
-    """Search keyword: tìm trong title và author"""
+    """Danh sách sách + tìm kiếm (từ khóa / vector) trên cùng một trang."""
     query = request.GET.get('q', '').strip()
-    books = []
+    search_type = request.GET.get('type', 'keyword').strip().lower()
+
+    if query and search_type == 'vector':
+        books = _search_vector(query)
+        return render(request, 'book/list.html', {
+            'books': books, 'query': query, 'search_type': 'vector'
+        })
     if query:
-        books = Book.objects.filter(Q(title__icontains=query) | Q(author__icontains=query))
-    return render(request, 'book/search.html', {'books': books, 'search_type': 'keyword', 'query': query})
+        books = Book.objects.filter(
+            Q(title__icontains=query) | Q(author__icontains=query)
+        )
+        return render(request, 'book/list.html', {
+            'books': books, 'query': query, 'search_type': 'keyword'
+        })
+    books = Book.objects.all()
+    return render(request, 'book/list.html', {
+        'books': books, 'query': '', 'search_type': None
+    })
 
-def book_search_vector(request):
-    """Search vector: tìm theo semantic similarity"""
-    query = request.GET.get('q', '').strip()
-    if not query:
-        return render(request, 'book/search.html', {'books': [], 'search_type': 'vector', 'query': query})
-    
-    # Encode query
-    model = get_embedding_model()
-    query_vector = model.encode(query).reshape(1, -1)
-    
-    # Lấy sách có embedding
+
+def _search_vector(query):
+    """Tìm sách theo vector (semantic)."""
     books_list = list(Book.objects.filter(embedding__isnull=False).exclude(embedding=''))
     book_vectors, valid_books = [], []
     for book in books_list:
@@ -52,19 +47,45 @@ def book_search_vector(request):
         if emb:
             book_vectors.append(emb)
             valid_books.append(book)
-    
     if not book_vectors:
-        return render(request, 'book/search.html', {'books': [], 'search_type': 'vector', 'query': query})
-    
-    # Tính similarity và sắp xếp
+        return []
+    model = get_embedding_model()
+    query_vector = model.encode(query).reshape(1, -1)
     similarities = cosine_similarity(query_vector, np.array(book_vectors))[0]
     results = []
     for idx in np.argsort(similarities)[::-1][:10]:
         if similarities[idx] > 0.1:
             valid_books[idx].similarity_score = round(similarities[idx] * 100, 2)
             results.append(valid_books[idx])
-    
-    return render(request, 'book/search.html', {'books': results, 'search_type': 'vector', 'query': query})
+    return results
+
+
+def book_detail(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    return render(request, 'book/detail.html', {'book': book})
+
+
+def book_search(request):
+    """Chuyển hướng sang danh sách sách (tìm kiếm tích hợp)."""
+    return redirect('book_list')
+
+
+def book_search_keyword(request):
+    """Redirect: giữ link cũ, chuyển sang book_list với ?q=&type=keyword."""
+    q = request.GET.get('q', '').strip()
+    if q:
+        from django.urls import reverse
+        return redirect(reverse('book_list') + '?q=' + quote(q) + '&type=keyword')
+    return redirect('book_list')
+
+
+def book_search_vector(request):
+    """Redirect: giữ link cũ, chuyển sang book_list với ?q=&type=vector."""
+    q = request.GET.get('q', '').strip()
+    if q:
+        from django.urls import reverse
+        return redirect(reverse('book_list') + '?q=' + quote(q) + '&type=vector')
+    return redirect('book_list')
 from store.controllers.customerController.views import customer_required
 
 def home(request):
@@ -78,8 +99,8 @@ def recommend_books(request):
     
     if not bought_books.exists():
         popular_books = Book.objects.annotate(
-            avg_rating=Avg('rating__score', default=0),
-            order_count=Count('orderitem', default=0)
+            avg_rating=Avg('rating__score'),
+            order_count=Count('orderitem')
         ).order_by('-avg_rating', '-order_count')[:5]
         return render(request, 'book/recommend.html', {'books': popular_books})
     

@@ -2,12 +2,37 @@
 {% block title %}Danh sách sách - Bookstore{% endblock %}
 {% block content %}
 <h1 class="page-title">Danh sách sách</h1>
-<form method="GET" action="{% url 'book_search' %}" class="mb-4">
-    <div class="input-group">
-        <input type="text" name="q" class="form-control" placeholder="Tìm sách theo tên, tác giả...">
-        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{% url 'book_list' %}">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label small text-muted">Tìm sách theo tên, tác giả</label>
+                    <input type="text" name="q" class="form-control form-control-lg" placeholder="Nhập từ khóa..." value="{{ query }}">
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" name="type" value="keyword" class="btn btn-primary flex-fill">Từ khóa</button>
+                    <button type="submit" name="type" value="vector" class="btn btn-success flex-fill">Tìm theo nghĩa (AI)</button>
+                </div>
+            </div>
+        </form>
     </div>
-</form>
+</div>
+
+{% if search_type %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4 class="h5 mb-0">
+        Kết quả: "{{ query }}"
+        {% if search_type == 'keyword' %}
+        <span class="badge bg-primary">Từ khóa</span>
+        {% else %}
+        <span class="badge bg-success">Vector</span>
+        {% endif %}
+    </h4>
+    <span class="text-muted">{{ books|length }} kết quả</span>
+</div>
+{% endif %}
+
 <div class="row g-4">
     {% for book in books %}
     <div class="col-md-6 col-lg-4">
@@ -17,6 +42,9 @@
                 <p class="card-text text-muted mb-1">Tác giả: {{ book.author }}</p>
                 <p class="card-text mb-1"><strong>Giá: ${{ book.price }}</strong></p>
                 <p class="card-text small text-muted">Tồn kho: {{ book.stock_quantity }}</p>
+                {% if search_type == 'vector' and book.similarity_score %}
+                <span class="badge bg-info">{{ book.similarity_score }}% trùng nghĩa</span>
+                {% endif %}
                 <div class="btn-action-group mt-2">
                     <a href="{% url 'book_detail' book.id %}" class="btn btn-primary btn-sm">Chi tiết</a>
                     {% if book.stock_quantity > 0 %}
@@ -31,7 +59,9 @@
     </div>
     {% empty %}
     <div class="col-12">
-        <div class="empty-state">Chưa có sách nào.</div>
+        <div class="empty-state">
+            {% if query %}Không tìm thấy sách nào.{% else %}Chưa có sách nào.{% endif %}
+        </div>
     </div>
     {% endfor %}
 </div>

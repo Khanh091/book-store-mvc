@@ -64,8 +64,8 @@ def customer_profile(request):
     if not bought_book_ids:
         recommended_books = (
             Book.objects.annotate(
-                avg_rating=Avg('rating__score', default=0),
-                order_count=Count('orderitem', default=0),
+                avg_rating=Avg('rating__score'),
+                order_count=Count('orderitem'),
             )
             .order_by('-avg_rating', '-order_count')[:5]
         )

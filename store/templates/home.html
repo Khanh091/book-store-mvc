@@ -3,23 +3,7 @@
 {% block content %}
 <h1 class="page-title">{{ message }}</h1>
 <div class="row g-4">
-    <div class="col-md-6 col-lg-3">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Khách hàng</h5>
-                <p class="card-text text-muted small">Đăng nhập hoặc đăng ký để mua sách, xem gợi ý.</p>
-                <div class="btn-action-group">
-                    <a href="{% url 'customer_login' %}" class="btn btn-primary">Đăng nhập</a>
-                    <a href="{% url 'customer_register' %}" class="btn btn-outline-secondary">Đăng ký</a>
-                    {% if request.session.customer_id %}
-                    <a href="{% url 'customer_profile' %}" class="btn btn-outline-primary">Hồ sơ</a>
-                    <a href="{% url 'customer_logout' %}" class="btn btn-outline-danger">Đăng xuất</a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
+    <div class="col-md-6 col-lg-4">
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">Sách</h5>
@@ -31,7 +15,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-3">
+    <div class="col-md-6 col-lg-4">
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">Giỏ hàng</h5>
@@ -42,7 +26,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-lg-3">
+    <div class="col-md-6 col-lg-4">
         <div class="card h-100">
             <div class="card-body">
                 <h5 class="card-title">Nhân viên</h5>
