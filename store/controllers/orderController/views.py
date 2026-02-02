@@ -83,7 +83,7 @@ def select_payment(request):
         payment_id = request.POST.get('payment_id')
         request.session['payment_id'] = payment_id
         return redirect('checkout')
-    payments = Payment.objects.filter(status='active')
+    payments = Payment.objects.all();
     return render(request, 'order/select_payment.html', {'payments': payments})
 
 @customer_required
